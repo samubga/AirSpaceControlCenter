@@ -2,6 +2,7 @@ package com.example.airspacecontrolcenter;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -9,33 +10,29 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
-import org.jxmapviewer.viewer.DefaultTileFactory;
-import org.jxmapviewer.viewer.GeoPosition;
-import org.jxmapviewer.viewer.TileFactoryInfo;
+import org.jxmapviewer.viewer.*;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
 
 public class MapViewController2 implements Initializable {
 
@@ -67,25 +64,27 @@ public class MapViewController2 implements Initializable {
     @FXML
     private Label totalAirplaneCount;
 
+    private JXMapViewer mapViewer;
     private static final int MAP_WIDTH = 1400;
     private static final int MAP_HEIGHT = 650;
-    private Ciudad newYork = new Ciudad("Nueva york",274, 181);
-    private Ciudad madrid = new Ciudad("madrid",520.0, 183.0);
-    private Ciudad brasilia = new Ciudad("brasilia",343.0, 446.0);
-    private Ciudad losAngeles = new Ciudad("losAngeles",92.0, 211.0);
-    private Ciudad roma = new Ciudad("roma",586.0, 177.0);
-    private Ciudad dubai = new Ciudad("dubai",740.0, 258.0);
-    private Ciudad tokyo = new Ciudad("tokyo",1057.0, 205.0);
-    private Ciudad sydney = new Ciudad("sydney",1095.0, 529.0);
-    private Ciudad paris = new Ciudad("paris",539.0, 147.05);
-    private Ciudad bangkok = new Ciudad("bangkok",927.0, 307.0);
+    private Ciudad newYork = new Ciudad("Nueva york",40.68063802521456, -74.1796875);
+    private Ciudad madrid = new Ciudad("madrid",40.3130432088809, -3.5595703125);
+    private Ciudad brasilia = new Ciudad("brasilia",-15.707662769583505, -47.5927734375);
+    private Ciudad losAngeles = new Ciudad("losAngeles",33.7243396617476, -117.685546875);
+    private Ciudad roma = new Ciudad("roma",41.88592102814744, 12.67822265625);
+    private Ciudad dubai = new Ciudad("dubai",23.725011735951796, 54.55810546875);
+    private Ciudad tokyo = new Ciudad("tokyo",35.38904996691167, 139.04296875);
+    private Ciudad sydney = new Ciudad("sydney",-34.234512362369856, 150.29296875);
+    private Ciudad paris = new Ciudad("paris",48.661942846070055, 2.3291015625);
+    private Ciudad bangkok = new Ciudad("bangkok",20.385825381874263, 95.009765625);
     private List<Ciudad> ciudades = new ArrayList<>();
 
     private Random random = new Random();
-    private List<Airplane> totalAirplanes = new ArrayList<>();
+    private List<DefaultWaypoint> totalAirplanes = new ArrayList<>();
 
-    private List<Airplane> airplanes = new ArrayList<>();
+    private List<DefaultWaypoint> airplanes = new ArrayList<>();
     private Timeline timeline;
+    private static Timer timer;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Load airplane image (assuming the image file is in resources folder)
@@ -110,12 +109,17 @@ public class MapViewController2 implements Initializable {
 
 
 
-         Session laSesion = null;
-         SessionFactory fabrica = null;
+
+
+
+
+        /*
+
+        Session laSesion = null;
+        SessionFactory fabrica = null;
 
         File file3 = new File("src\\main\\java\\com\\example\\airspacecontrolcenter\\hibernate.cfg.xml");
         Configuration cfg = new Configuration().configure(file3.toURI().toString());
-
 
         cfg.addAnnotatedClass(Ciudad.class);
         fabrica = cfg.buildSessionFactory();
@@ -128,6 +132,7 @@ public class MapViewController2 implements Initializable {
         laSesion.getTransaction().commit();
         laSesion.close();
 
+        */
 
 
 
@@ -141,26 +146,11 @@ public class MapViewController2 implements Initializable {
 
 
         // Handle mouse click on the map to set the airplane destination
-        panel.setOnMouseClicked(event -> {
-            double x = event.getX();
-            double y = event.getY();
-            System.out.println("Coordenadas del clic: (" + x + ", " + y + ")");
 
-            // Inicializar el indicador de clic si aún no se ha hecho
-            if (clickIndicator == null) {
-                clickIndicator = new Circle(5);
-                clickIndicator.setFill(Color.RED); // Color rojo para el indicador de clic
-                anchorPane.getChildren().add(clickIndicator);
-            }
-
-            // Mover el indicador de clic a la posición del clic
-            clickIndicator.setCenterX(x);
-            clickIndicator.setCenterY(y);
-        });
 
 
         stopButton.setOnAction(event -> stopAnimation());
-        startButton.setOnAction(event -> startAnimation());
+        startButton.setOnAction(event ->  startAnimation());
 
 
     }
@@ -174,25 +164,42 @@ public class MapViewController2 implements Initializable {
                 mapPanel.setPreferredSize(new Dimension(1293, 643)); // Set the preferred size
 
                 // Inicializar el JXMapViewer
-                JXMapViewer mapViewer = new JXMapViewer();
+                mapViewer = new JXMapViewer();
                 TileFactoryInfo info = new OSMTileFactoryInfo();
                 DefaultTileFactory tileFactory = new DefaultTileFactory(info);
                 mapViewer.setTileFactory(tileFactory);
-                GeoPosition initialPosition = new GeoPosition(7.291418, 80.636696);
-                mapViewer.setZoom(7);
+
+
+                // EVENTOS Y LISTENERS
+                mapViewer.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        super.mouseClicked(e);
+
+                        // Obtener las coordenadas del clic dentro del JXMapViewer
+                        Point clickPoint = e.getPoint();
+                        GeoPosition clickedPosition = mapViewer.convertPointToGeoPosition(clickPoint);
+                        double latitude = clickedPosition.getLatitude();
+                        double longitude = clickedPosition.getLongitude();
+
+                        // Imprimir las coordenadas en la consola
+                        System.out.println("Coordenadas del clic: (" + latitude + ", " + longitude + ")");
+
+                        // Aquí puedes realizar las acciones que necesites con las coordenadas obtenidas
+                    }
+                });
+
 
                 MouseInputListener mia = new PanMouseInputListener(mapViewer);
                 mapViewer.addMouseListener(mia);
                 mapViewer.addMouseMotionListener(mia);
                 mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
-                mapViewer.setAddressLocation(initialPosition);
 
-                // Configurar el TileFactory para obtener los mapas
 
 
                 // Agregar el JXMapViewer al JPanel
                 mapPanel.add(mapViewer, BorderLayout.CENTER);
-
+                generateAirplane();
                 // Establecer el contenido del SwingNode como el JPanel
                 swingNode.setContent(mapPanel);
             }
@@ -200,21 +207,129 @@ public class MapViewController2 implements Initializable {
     }
 
     private void startAnimation() {
+        GeoPosition gp = new GeoPosition(41.88592102814744, 12.67822265625);
         timeline = new Timeline(
                 new KeyFrame(Duration.seconds(0.09), event -> {
-                    for (Airplane airplane : totalAirplanes) {
-                        // Mueve el avión hacia su destino
-                        moveAirplane(airplane, airplane.getDestinationX(), airplane.getDestinationY());
+
+                    for (DefaultWaypoint airplane : totalAirplanes) {
+                        moveAirplane(airplane, gp);
                     }
-                    // Verifica si se debe generar un nuevo avión
-                    if (Math.random() < 0.09) {
-                        generateAirplane();
-                    }
+
                 })
         );
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+
+
     }
+
+    private void moveAirplane(DefaultWaypoint airplane, GeoPosition destination) {
+        // Obtener la posición actual del avión
+        GeoPosition currentPosition = airplane.getPosition();
+
+        // Calcular la distancia y el rumbo hacia el destino
+        double distance = calculateDistance(currentPosition, destination);
+        double bearing = calculateBearing(currentPosition, destination);
+        System.out.println("distance " + distance);
+        // Velocidad máxima del avión en kilómetros por iteración
+        double maxSpeed = 0.4;
+
+        // Definir latDelta y lonDelta fuera de la lógica condicional
+        double latDelta;
+        double lonDelta;
+
+        // Si la distancia es menor que el umbral, reducir la velocidad gradualmente
+        if (distance < 30) {
+            // Calcular la velocidad reducida proporcionalmente a la distancia
+            double reducedSpeed = maxSpeed * (distance / 30); // La velocidad se reduce a medida que la distancia disminuye
+            latDelta = reducedSpeed * Math.cos(Math.toRadians(bearing));
+            lonDelta = reducedSpeed * Math.sin(Math.toRadians(bearing));
+        } else {
+            // Usar la velocidad máxima si la distancia es mayor que el umbral
+            latDelta = maxSpeed * Math.cos(Math.toRadians(bearing));
+            lonDelta = maxSpeed * Math.sin(Math.toRadians(bearing));
+        }
+
+        // Calcular la nueva posición del avión
+        double newLat = currentPosition.getLatitude() + latDelta;
+        double newLon = currentPosition.getLongitude() + lonDelta;
+
+        // Actualizar la posición del avión
+        GeoPosition newPosition = new GeoPosition(newLat, newLon);
+        airplane.setPosition(newPosition);
+
+        // Volver a pintar el mapa para reflejar los cambios
+        mapViewer.repaint();
+
+        // Verificar si el avión ha llegado a su destino
+        if (distance == 0.0) {
+            airplanes.remove(airplane);
+            removeWaypoint(airplane);
+            System.out.println("El avión ha llegado a su destino.");
+        }
+    }
+
+    private void removeWaypoint(DefaultWaypoint waypoint) {
+
+        // Get the WaypointPainter for the waypoints layer
+        WaypointPainter waypointPainter = (WaypointPainter) mapViewer.getOverlayPainter();
+
+// Create a new set of waypoints that does not include the waypoint to remove
+        Set<Waypoint> newWaypoints = new HashSet<>(waypointPainter.getWaypoints());
+        newWaypoints.remove(waypoint);
+
+// Set the WaypointPainter's set of waypoints to the new set
+        waypointPainter.setWaypoints(newWaypoints);
+
+// Update the display
+        mapViewer.repaint();
+    }
+
+    private double calculateDistance(GeoPosition pos1, GeoPosition pos2) {
+        double lat1 = Math.toRadians(pos1.getLatitude());
+        double lon1 = Math.toRadians(pos1.getLongitude());
+        double lat2 = Math.toRadians(pos2.getLatitude());
+        double lon2 = Math.toRadians(pos2.getLongitude());
+
+        // Radio de la Tierra en kilómetros
+        double radius = 6371.0;
+
+        // Fórmula de Haversine para calcular la distancia entre dos puntos en la Tierra
+        double dLat = lat2 - lat1;
+        double dLon = lon2 - lon1;
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = radius * c;
+
+        return distance;
+    }
+
+
+
+    private double calculateBearing(GeoPosition pos1, GeoPosition pos2) {
+        double lat1 = Math.toRadians(pos1.getLatitude());
+        double lon1 = Math.toRadians(pos1.getLongitude());
+        double lat2 = Math.toRadians(pos2.getLatitude());
+        double lon2 = Math.toRadians(pos2.getLongitude());
+
+        double dLon = lon2 - lon1;
+
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+
+        double bearing = Math.atan2(y, x);
+
+        // Convertir el rumbo de radianes a grados
+        bearing = Math.toDegrees(bearing);
+
+        // Ajustar el rango de 0 a 360 grados
+        bearing = (bearing + 360) % 360;
+
+        return bearing;
+    }
+
 
     private void stopAnimation() {
         if (timeline != null) {
@@ -223,83 +338,37 @@ public class MapViewController2 implements Initializable {
     }
 
     private void generateAirplane() {
-        File file = new File("src\\main\\java\\com\\example\\airspacecontrolcenter\\recursos\\airplane.png");
-        Image image = new Image(file.toURI().toString());
-
-
+        // Elegir una ciudad de origen aleatoria
         int ciudadOrigenAleatoria = random.nextInt(ciudades.size());
         Ciudad origen = ciudades.get(ciudadOrigenAleatoria);
 
+        // Elegir una ciudad de destino aleatoria diferente a la de origen
         int ciudadDestinoAleatoria;
         Ciudad destino = null;
-
         do {
             ciudadDestinoAleatoria = random.nextInt(ciudades.size());
             destino = ciudades.get(ciudadDestinoAleatoria);
         } while (ciudadOrigenAleatoria == ciudadDestinoAleatoria);
 
 
+        DefaultWaypoint df = new DefaultWaypoint(new GeoPosition(madrid.getLatitude(), madrid.getLongitude()));
+        WaypointPainter waypointPainter = new WaypointPainter();
+        waypointPainter.setWaypoints(Collections.singleton((Waypoint) df));
+        mapViewer.setOverlayPainter(waypointPainter);
 
 
-
-        // Usa las coordenadas de las ciudades como posición inicial y final de los aviones
-        ImageView airplaneImageView = new ImageView(image);
-
-
-        Airplane air = new Airplane(airplaneImageView, destino.getCoordenadaX() +5, destino.getCoordenadaY() +5, 1);
-
-
-        air.getImageView().setX(origen.getCoordenadaX() - 6);
-        air.getImageView().setY(origen.getCoordenadaY() - 6);
-        air.getImageView().setFitWidth(15);
-        air.getImageView().setFitHeight(15);
-        panel.getChildren().add(air.getImageView());
-        totalAirplanes.add(air);
-        airplanes.add(air);
-        airplaneCount.setText("" + airplanes.size());
-        totalAirplaneCount.setText("" + totalAirplanes.size());
+        totalAirplanes.add(df);
+        airplanes.add(df);
+        // Actualizar la cantidad de aviones y total de aviones
+        // Update the airplane count on the JavaFX application thread
+        Platform.runLater(() -> {
+            airplaneCount.setText(airplanes.size() + "");
+            totalAirplaneCount.setText(totalAirplanes.size() + "");
+        });
     }
 
 
     // Method to update airplane position based on animation (replace with your logic)
-    private void moveAirplane(Airplane airplane, double destinationX, double destinationY) {
-        // La lógica para mover el avión individualmente hacia las coordenadas de destino
-        double currentX = airplane.getImageView().getX() + airplane.getImageView().getImage().getWidth() / 2;
 
-        // Coordenada X del centro del avión
-        double currentY = airplane.getImageView().getY() + airplane.getImageView().getImage().getHeight() / 2; // Coordenada Y del centro del avión
-
-        // Calcular la distancia entre el avión y el destino
-        double deltaX = destinationX - currentX;
-        double deltaY = destinationY - currentY;
-        double distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-
-        // Si la distancia es mayor que un cierto umbral, sigue moviendo el avión hacia el destino
-        if (distance > 1) {
-            // Calcular el ángulo de rotación
-            double angle = Math.atan2(deltaY, deltaX);
-
-            // Calcular el desplazamiento en X y Y basado en la distancia
-            double moveX = (deltaX / distance) * airplane.getSpeed();
-            double moveY = (deltaY / distance) * airplane.getSpeed();
-
-            // Actualizar la posición del avión
-            double newX = currentX + moveX;
-            double newY = currentY + moveY;
-            airplane.getImageView().setX(newX - airplane.getImageView().getImage().getWidth() / 2);
-            airplane.getImageView().setY(newY - airplane.getImageView().getImage().getHeight() / 2);
-
-            // Rotar el avión para que apunte hacia su destino
-            airplane.getImageView().setRotate(Math.toDegrees(angle));
-
-
-
-
-        } else {
-             airplanes.remove(airplane);
-             airplane.getImageView().setVisible(false);
-
-        }
-    }
 
 }

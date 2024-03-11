@@ -13,24 +13,24 @@ public class Ciudad {
     @Column(name = "nombre")
     private String nombre;
 
-    @Column(name = "coordenadaX")
-    private double coordenadaX;
+    @Column(name = "latitude")
+    private double latitude;
 
-    @Column(name = "coordenadaY")
-    private double coordenadaY;
+    @Column(name = "longitude")
+    private double longitude;
 
-    public Ciudad(String nombre, double coordenadaX, double coordenadaY) {
-        this.coordenadaX = coordenadaX;
-        this.coordenadaY = coordenadaY;
+    public Ciudad(String nombre, double latitude, double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.nombre = nombre;
     }
 
-    public double getCoordenadaX() {
-        return coordenadaX;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public double getCoordenadaY() {
-        return coordenadaY;
+    public double getLongitude() {
+        return longitude;
     }
     public int getCodigo() {
         return codigo;
@@ -48,11 +48,11 @@ public class Ciudad {
         this.nombre = nombre;
     }
 
-    public void setCoordenadaX(double coordenadaX) {
-        this.coordenadaX = coordenadaX;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
-    public void setCoordenadaY(double coordenadaY) {
-        this.coordenadaY = coordenadaY;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

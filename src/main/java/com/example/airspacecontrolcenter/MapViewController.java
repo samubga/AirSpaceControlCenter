@@ -198,11 +198,11 @@ public class MapViewController implements Initializable {
         ImageView airplaneImageView = new ImageView(image);
 
 
-        Airplane air = new Airplane(airplaneImageView, destino.getCoordenadaX() +5, destino.getCoordenadaY() +5, 1);
+        Airplane air = new Airplane(airplaneImageView, destino.getLatitude() +5, destino.getLongitude() +5, 1);
 
 
-        air.getImageView().setX(origen.getCoordenadaX() - 6);
-        air.getImageView().setY(origen.getCoordenadaY() - 6);
+        air.getImageView().setX(origen.getLatitude() - 6);
+        air.getImageView().setY(origen.getLongitude() - 6);
         air.getImageView().setFitWidth(15);
         air.getImageView().setFitHeight(15);
         panel.getChildren().add(air.getImageView());
