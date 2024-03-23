@@ -15,7 +15,7 @@ public class RunApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("hello-view2.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("map-view-v2.fxml"));
         Pane root = null;
         try {
             root = loader.load();

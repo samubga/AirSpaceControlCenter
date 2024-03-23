@@ -1,5 +1,7 @@
-package com.example.airspacecontrolcenter;
+package com.example.airspacecontrolcenter.model;
 import jakarta.persistence.*;
+import org.jxmapviewer.viewer.GeoPosition;
+
 @Entity
 @Table(name = "Ciudad")
 public class Ciudad {
@@ -19,10 +21,19 @@ public class Ciudad {
     @Column(name = "longitude")
     private double longitude;
 
+
+
+    private GeoPosition posicion;
+
     public Ciudad(String nombre, double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.nombre = nombre;
+        posicion = new GeoPosition(latitude, longitude);
+    }
+
+    public GeoPosition getPosicion() {
+        return posicion;
     }
 
     public double getLatitude() {

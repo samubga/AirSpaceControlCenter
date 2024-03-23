@@ -1,5 +1,7 @@
-package com.example.airspacecontrolcenter;
+package com.example.airspacecontrolcenter.oldversion;
 
+import com.example.airspacecontrolcenter.oldversion.Airplane;
+import com.example.airspacecontrolcenter.model.Ciudad;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;

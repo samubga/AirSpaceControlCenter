@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="854.0" prefWidth="1295.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.airspacecontrolcenter.MapViewController2">
+   <children>
+      <MenuBar prefHeight="25.0" prefWidth="1293.0">
+         <menus>
+            <Menu text="Control Aéreo">
+               <items>
+                  <MenuItem fx:id="menuDespegue" onAction="#handleMenuDespegue" text="Despegues" />
+                  <MenuItem text="Aterrizajes" />
+                  <MenuItem text="Exit" />
+               </items>
+            </Menu>
+            <Menu text="Rutas">
+               <items>
+                  <MenuItem text="Crear y eliminar" />
+                  <MenuItem text="Ver y modificar" />
+                  <MenuItem text="Asignar ruta" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Ciudades y aeropuertos">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Crear y eliminar" />
+                  <MenuItem mnemonicParsing="false" text="Ver y modificar" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Aviones">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Operaciones" />
+                  <MenuItem mnemonicParsing="false" text="Ver todos" />
+              </items>
+            </Menu>
+         </menus>
+      </MenuBar>
+      <Button id="startButton" fx:id="startButton" layoutX="306.0" layoutY="670.0" mnemonicParsing="false" prefHeight="33.0" prefWidth="129.0" text="Start simulation" />
+      <Pane fx:id="panel" layoutX="1.0" layoutY="25.0" prefHeight="608.0" prefWidth="1293.0" />
+      <Button fx:id="stopButton" layoutX="463.0" layoutY="670.0" mnemonicParsing="false" prefHeight="33.0" prefWidth="154.0" text="Stop simulation" />
+      <Label layoutX="35.0" layoutY="642.0" prefHeight="18.0" prefWidth="194.0" text="Avioines volando en este momento:" />
+      <Label fx:id="airplaneCount" layoutX="232.0" layoutY="643.0" prefHeight="17.0" prefWidth="74.0" text="0" />
+      <Label layoutX="35.0" layoutY="669.0" prefHeight="17.0" prefWidth="114.0" text="Total de vuelos hoy:" />
+      <Label fx:id="totalAirplaneCount" layoutX="150.0" layoutY="669.0" prefHeight="17.0" prefWidth="81.0" text="0" />
+      <Label layoutX="35.0" layoutY="699.0" prefHeight="17.0" prefWidth="81.0" text="Info avion:" />
+      <TextArea fx:id="textoInfo" layoutX="36.0" layoutY="727.0" prefHeight="107.0" prefWidth="689.0" />
+      <StackPane fx:id="notificationPane" layoutX="945.0" layoutY="742.0" prefHeight="98.0" prefWidth="336.0" />
+   </children>
+</AnchorPane>
